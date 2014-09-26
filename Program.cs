@@ -1782,7 +1782,7 @@ namespace ConsoleApplication1
 
             if (this.enemySecretCount >= 1)
             {
-                for (int i = 0; i < this.enemySecretCount; i++)
+                for (int i = 0; i < this.enemySecretList.Count; i++)
                 {
                     if (!this.enemySecretList[i].isEqual(p.enemySecretList[i]))
                     {
@@ -2000,7 +2000,7 @@ namespace ConsoleApplication1
 
             if (this.enemySecretCount >= 1)
             {
-                for (int i = 0; i < this.enemySecretCount; i++)
+                for (int i = 0; i < this.enemySecretList.Count; i++)
                 {
                     if (!this.enemySecretList[i].isEqual(p.enemySecretList[i]))
                     {
