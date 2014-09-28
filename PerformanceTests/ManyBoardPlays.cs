@@ -27,13 +27,13 @@ namespace ConsoleApplication1.PerformanceTests
             board14000 = board14000.Replace("<EoF>", ""); // doing the board with maxwide = 14000
 
 
-            doTest(board500, 5);
+            doTest(board500, 10);
 
             doTest(board1000, 2);
 
-            //doTest(board9000, 6);
+            doTest(board3000, 6);
 
-            //doTest(board14000, 4); //well it takes forever... small sample
+            doTest(board7000, 4); //well it takes forever... small sample
 
             Console.Read();
         }
@@ -47,6 +47,7 @@ namespace ConsoleApplication1.PerformanceTests
             Bot b = new Bot();
 
             Console.WriteLine("okay i got here");
+            b.doData(data);//get rid of the first trial just for kicks.
             Stopwatch timer = new Stopwatch();
             timer.Start();
             for (int i = 0; i < numTimes; i++)

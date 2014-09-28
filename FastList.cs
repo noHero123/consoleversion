@@ -110,6 +110,13 @@ namespace ConsoleApplication1
                         list.Clear();
                         goodList.Clear();
                         break;
+                    case 13: // pop first
+                        if (list.Count > 0)
+                        {
+                            list.PopFirst();
+                            goodList.RemoveAt(0);
+                        }
+                        break;
                     default:
                         if (goodList.Count < 1000)
                         {
@@ -123,6 +130,8 @@ namespace ConsoleApplication1
                 if (!list.ToString().Equals(ToString(goodList)))
                 {
                     Console.WriteLine("they differ because of " + whichOne + ": " + num + ", " + num2);
+                    Console.WriteLine(list.ToString());
+                    Console.WriteLine(ToString(goodList));
                     Console.WriteLine();
                 }
                 else
@@ -157,6 +166,7 @@ namespace ConsoleApplication1
         private T[] data;
 
         private int count;
+        private int offset=0;
 
         // Reusable enumerator
         public class Enumerator : IEnumerator<T>
@@ -234,10 +244,10 @@ namespace ConsoleApplication1
                 return builder;
             for (int i = 0; i < count-1; i++)
             {
-                builder += data[i].ToString() + ", ";
+                builder += this[i].ToString() + ", ";
             }
            // if (count - 1 < data.Length) 
-            builder += data[count - 1].ToString();
+            builder += this[count - 1].ToString();
             return builder;
         }
         public FastList(int size)
@@ -273,7 +283,7 @@ namespace ConsoleApplication1
         {
             for (int i = 0; i < Count; i++)
             {
-                if (obj.Equals(data[i]))
+                if (obj.Equals(this[i]))
                 {
                     return true;
                 }
@@ -286,7 +296,7 @@ namespace ConsoleApplication1
             int total = count+index;
             for (int i = index; i < total; i++)
             {
-                newData[i-index] = data[i];
+                newData[i-index] = this[i];
             }
             return new FastList<T>(newData);
         }
@@ -309,7 +319,7 @@ namespace ConsoleApplication1
         {
             for (int i = 0; i < Count; i++)
             {
-                if (obj.Equals(data[i]))
+                if (obj.Equals(this[i]))
                 {
                     RemoveAt(i);
                     return;
@@ -322,7 +332,7 @@ namespace ConsoleApplication1
             int beforeCount = Count;
             for (int i = 0; i < Count; i++)
             {
-                if (what.Invoke(data[i]))
+                if (what.Invoke(this[i]))
                 {
                     RemoveAtOrdered(i);
                     i--;
@@ -339,7 +349,7 @@ namespace ConsoleApplication1
             int beforeCount = Count;
             for (int i = 0; i < Count; i++)
             {
-                if (what.Invoke(data[i]))
+                if (what.Invoke(this[i]))
                 {
                     RemoveAt(i);
                 }
@@ -354,13 +364,18 @@ namespace ConsoleApplication1
         {
             for (int i = 0; i < Count; i++)
             {
-                if (obj.Equals(data[i]))
+                if (obj.Equals(this[i]))
                 {
                     RemoveAtOrdered(i);
                     return;
                 }
             }
             return;
+        }
+        public void PopFirst()
+        {
+            count--;
+            offset++;
         }
         public void Sort(Func<T, T,int> functionDelegate)
         {
@@ -378,15 +393,15 @@ namespace ConsoleApplication1
             upper = Count-1;
             for (int outer = 1; outer <= upper; outer++)
             {
-                temp = data[outer];
+                temp = this[outer];
                 inner = outer;
-                while (inner > 0 && functionDelegate(data[inner - 1], temp) >= 0)
+                while (inner > 0 && functionDelegate(this[inner - 1], temp) >= 0)
                 {
-                    data[inner] = data[inner - 1];
+                    this[inner] = this[inner - 1];
                     inner -= 1;
                 }
 
-                data[inner] = temp;
+                this[inner] = temp;
             }
         }
         public T Find(Func<T,bool> functionDelegate)
@@ -394,8 +409,8 @@ namespace ConsoleApplication1
             int beforeCount = Count;
             for (int i = 0; i < Count; i++)
             {
-                if (functionDelegate.Invoke(data[i]))
-                    return data[i];
+                if (functionDelegate.Invoke(this[i]))
+                    return this[i];
             }
             if (beforeCount != count)
             {
@@ -408,10 +423,10 @@ namespace ConsoleApplication1
             //count++;
             for (int j = count; j > location; j--)
             {
-                data[j] = data[j-1];
+                this[j] = this[j-1];
             }
             count++;
-            data[location] = obj;
+            this[location] = obj;
             
         }
         public void RemoveRange(int lowIndex, int highIndex)// when order of list does not matter
@@ -429,13 +444,13 @@ namespace ConsoleApplication1
         public void RemoveAt(int index)// when order of list does not matter
         {
             count--;
-            data[index] = data[count];
+            this[index] = this[count];
         }
         public void RemoveAtOrdered(int index)// when order of list matters
         {
             for (int j = index; j < count-1; j++)
             {
-                data[j] = data[j + 1];
+                this[j] = this[j + 1];
             }
            count--;           
         }
@@ -443,15 +458,24 @@ namespace ConsoleApplication1
         {
             if (count < data.Length)
             {
-                data[count] = obj;
+                this[count] = obj;
                 count++;
             }
             else
             {
+                Console.WriteLine("doubled");
                 T[] tmp;
                 tmp = new T[data.Length * 2]; //TODO Review
+
                 Array.Copy(data, tmp, data.Length);
+
+                for (int i = 0; i < offset; i++)
+                {
+                    tmp[(count + i) % tmp.Length] = tmp[i % tmp.Length];
+                }
                 data = tmp;
+                this[count] = obj;
+                count++;
             }
             
         }
@@ -459,6 +483,7 @@ namespace ConsoleApplication1
         public void Clear()
         {
             count = 0;
+            offset = 0;
         }
 
         public IEnumerator<T> GetEnumerator()
@@ -493,7 +518,7 @@ namespace ConsoleApplication1
             T[] newData = new T[count];
             for (int i = 0; i < count; i++)
             {
-                newData[i] = data[i];
+                newData[i] = this[i];
             }
             return newData;
         }
@@ -501,9 +526,13 @@ namespace ConsoleApplication1
         {
             get
             {
-                if (count <= index)
-                    return default(T);
-                return this.data[index];
+                
+                return this.data[(offset+index)%this.data.Length];
+            }
+            set
+            {
+                
+                this.data[(offset+index)%this.data.Length]= value;
             }
         }
 

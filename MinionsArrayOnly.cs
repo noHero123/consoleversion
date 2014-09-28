@@ -5921,7 +5921,7 @@ namespace ConsoleApplication1
             if (this.bestActions.Count >= 1)
             {
                 this.bestmove = this.bestActions[0];
-                this.bestActions.RemoveAt(0);
+                this.bestActions.PopFirst();
             }
             this.bestmoveValue = bestval;
 
@@ -5955,7 +5955,7 @@ namespace ConsoleApplication1
             if (this.bestActions.Count >= 1)
             {
                 this.bestmove = this.bestActions[0];
-                this.bestActions.RemoveAt(0);
+                this.bestActions.PopFirst();
             }
 
             this.nextMoveGuess = new Playfield();
@@ -5998,7 +5998,7 @@ namespace ConsoleApplication1
             if (this.bestActions.Count >= 1)
             {
                 this.bestmove = this.bestActions[0];
-                this.bestActions.RemoveAt(0);
+                this.bestActions.PopFirst();
             }
             if (this.nextMoveGuess == null) this.nextMoveGuess = new Playfield();
             //this.nextMoveGuess.printBoardDebug();
