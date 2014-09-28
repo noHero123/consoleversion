@@ -609,16 +609,27 @@ namespace ConsoleApplication1
 
         public override float getPlayfieldValue(Playfield p)
         {
-            if (p.value >= -2000000) return p.value;
+            //win/loss/alreadyevaluated
+            if (p.value >= -2000000) return p.value; //this means we've calculated it already? yes?
+            if (p.ownHero.Hp <= 0) return -10000;//we're dead, that sucks a lot
+            if (p.enemyHero.Hp <= 0) return 10000;  // he's dead, i like that
+
+            //time to start doing math... 
             int retval = 0;
+            int i = 0; // ah loop counter, might as well declare it now
+            //cards and... whatever evaluatePenalty is?
             retval -= p.evaluatePenality;
             retval += p.owncards.Count * 5;
 
+            //armor and hp
             retval += p.ownHero.Hp + p.ownHero.armor;
             retval += -(p.enemyHero.Hp + p.enemyHero.armor);
 
-            retval += p.ownMaxMana * 15 - p.enemyMaxMana * 15;
+            //mana
+            retval += p.ownMaxMana * 15 - p.enemyMaxMana * 15; // if you can multiply these by 16 instead we can use bit shifting.... but that's probably getting too picky...
 
+
+            //hero status
             if (p.ownWeaponAttack >= 1)
             {
                 retval += p.ownWeaponAttack * p.ownWeaponDurability;
@@ -628,69 +639,100 @@ namespace ConsoleApplication1
             {
                 retval -= p.enemyWeaponDurability * p.enemyWeaponAttack;
             }
-            else
+            else if (p.enemyHeroName != HeroEnum.mage && p.enemyHeroName != HeroEnum.priest)
             {
-                if (p.enemyHeroName != HeroEnum.mage && p.enemyHeroName != HeroEnum.priest)
-                {
-                    retval += 11;
-                }
+                retval += 11;
             }
 
+
+            //card draw
             retval += p.owncarddraw * 5;
             retval -= p.enemycarddraw * 15;
 
+            //hero power? and coin
             bool useAbili = false;
             bool usecoin = false;
-            foreach (Action a in p.playactions)
+            for (i = 0; i < p.playactions.Count; i++)
             {
+
+                Action a = p.playactions[i];
+                //if(a==null) continue;
+
                 if (a.actionType == actionEnum.attackWithHero && p.enemyHero.Hp <= p.attackFaceHP) retval++;
-                if (a.actionType == actionEnum.useHeroPower) useAbili = true;
-                if (p.ownHeroName == HeroEnum.warrior && a.actionType == actionEnum.attackWithHero && useAbili) retval -= 1;
-                //if (a.actionType == actionEnum.useHeroPower && a.card.card.name == CardDB.cardName.lesserheal && (!a.target.own)) retval -= 5;
+                else if (a.actionType == actionEnum.useHeroPower)
+                {
+                    useAbili = true;
+                    if (p.ownHeroName == HeroEnum.warrior && a.actionType == actionEnum.attackWithHero) retval -= 1; //useabili is already true
+                }
                 if (a.actionType != actionEnum.playcard) continue;
                 if ((a.card.card.name == CardDB.cardName.thecoin || a.card.card.name == CardDB.cardName.innervate)) usecoin = true;
-            }
-            if (usecoin && useAbili && p.ownMaxMana <= 2) retval -= 40;
-            if (usecoin) retval -= 5 * p.manaTurnEnd;
-            //if (usecoin && p.mana >= 1) retval -= 20;
 
-            foreach (Minion m in p.ownMinions)
+            }
+            if (usecoin)
             {
+                retval -= 5 * p.manaTurnEnd; // using the coin sucks (very valuebal)
+                if (useAbili && p.ownMaxMana <= 2) retval -= 40; //sucks really worse if you use it for your own hero power? not sure we're doing here
+
+            }
+
+
+            // minion evaluation
+
+            if (p.ownMinions.Count == 0) retval -= 20;
+            if (p.enemyMinions.Count >= 4) retval -= 20; // wat about if we have that guy that steals minons in our hand and we can play it? idk just thinkin
+
+
+            for (i = 0; i < p.ownMinions.Count; i++)
+            {
+                Minion m = p.ownMinions[i];
+                //  if (m == null) continue;
                 retval += m.Hp * 1;
                 retval += m.Angr * 2;
                 retval += m.handcard.card.rarity;
                 if (m.windfury) retval += m.Angr;
                 if (m.taunt) retval += 1;
-                if (!m.taunt && m.stealth && penman.specialMinions.ContainsKey(m.name)) retval += 20;
+                else if (m.stealth && penman.specialMinions.ContainsKey(m.name)) retval += 20;
                 if (m.handcard.card.name == CardDB.cardName.silverhandrecruit && m.Angr == 1 && m.Hp == 1) retval -= 5;
-                if (m.handcard.card.name == CardDB.cardName.direwolfalpha || m.handcard.card.name == CardDB.cardName.flametonguetotem || m.handcard.card.name == CardDB.cardName.stormwindchampion || m.handcard.card.name == CardDB.cardName.raidleader) retval += 10;
-            }
+                else if (m.handcard.card.name == CardDB.cardName.direwolfalpha || m.handcard.card.name == CardDB.cardName.flametonguetotem || m.handcard.card.name == CardDB.cardName.stormwindchampion || m.handcard.card.name == CardDB.cardName.raidleader) retval += 10;
 
-            foreach (Minion m in p.enemyMinions)
+
+            }
+            for (i = 0; i < p.enemyMinions.Count; i++)
             {
+
+                Minion m = p.enemyMinions[i];
+                if (m == null) continue;
                 retval -= this.getEnemyMinionValue(m, p);
             }
+
+
+            //misc stuff
 
             retval -= p.enemySecretCount;
             retval -= p.lostDamage;//damage which was to high (like killing a 2/1 with an 3/3 -> => lostdamage =2
             retval -= p.lostWeaponDamage;
-            if (p.ownMinions.Count == 0) retval -= 20;
-            if (p.enemyMinions.Count >= 4) retval -= 20;
-            if (p.enemyHero.Hp <= 0) retval = 10000;
+
+
             //soulfire etc
             int deletecardsAtLast = 0;
-            foreach (Action a in p.playactions)
+            for (i = 0; i < p.playactions.Count; i++)
             {
+                Action a = p.playactions[i];
+                //   if (a == null) continue;
                 if (a.actionType != actionEnum.playcard) continue;
-                if (a.card.card.name == CardDB.cardName.soulfire || a.card.card.name == CardDB.cardName.doomguard || a.card.card.name == CardDB.cardName.succubus) deletecardsAtLast = 1;
-                if (deletecardsAtLast == 1 && !(a.card.card.name == CardDB.cardName.soulfire || a.card.card.name == CardDB.cardName.doomguard || a.card.card.name == CardDB.cardName.succubus)) retval -= 20;
+                bool discardsACard = (a.card.card.name == CardDB.cardName.soulfire || a.card.card.name == CardDB.cardName.doomguard || a.card.card.name == CardDB.cardName.succubus);
+                if (discardsACard) deletecardsAtLast = 1;
+                else if (deletecardsAtLast == 1) retval -= 20;//? not sure whatr this was to begin with (had a && !discardsACard next to it)
+
             }
+
+
             if (p.enemyHero.Hp >= 1 && p.guessingHeroHP <= 0)
             {
-                if (p.turnCounter < 2) retval += p.owncarddraw * 500;
+                retval += p.owncarddraw * 500;
                 retval -= 1000;
             }
-            if (p.ownHero.Hp <= 0) retval = -10000;
+
 
             p.value = retval;
             return retval;
@@ -1339,8 +1381,8 @@ namespace ConsoleApplication1
         private void addMinionsReal(FastList<Minion> source, FastList<Minion> trgt)
         {
            
-            foreach (Minion m in source)
-            {
+            for(int i = 0; i<source.Count; i++){
+                Minion m = source[i];
                 trgt.Add(new Minion(m));
             }
             
@@ -4231,7 +4273,7 @@ namespace ConsoleApplication1
             //FastList<Minion> temp = (ownturn)? this.ownMinions : this.enemyMinions;
 
             FastList<Minion> ownm = (ownturn) ? this.ownMinions : this.enemyMinions;
-            foreach (Minion m in ownm.ToArray())
+            foreach (Minion m in ownm)
             {
                 if (!m.silenced)
                 {
@@ -4241,7 +4283,7 @@ namespace ConsoleApplication1
                 if (!ownturn && m.destroyOnEnemyTurnEnd) this.minionGetDestroyed(m);
             }
             FastList<Minion> enemm = (ownturn) ? this.enemyMinions : this.ownMinions;
-            foreach (Minion m in enemm.ToArray())
+            foreach (Minion m in enemm)
             {
                 //only gruul + kelthuzad
                 if (!m.silenced && (m.name == CardDB.cardName.gruul || m.name == CardDB.cardName.kelthuzad))
@@ -4253,7 +4295,7 @@ namespace ConsoleApplication1
             this.doDmgTriggers();
 
             //shadowmadness
-            foreach (Minion m in ownm.ToArray())
+            foreach (Minion m in ownm)
             {
 
                 if (m.shadowmadnessed)
@@ -6730,6 +6772,7 @@ namespace ConsoleApplication1
         public int maxwide = 20;
         Movegenerator movegen = Movegenerator.Instance;
 
+        // This method had the HEAVIEST use of enumerators (like 98% according to profiler) so I rid of them here for regular for loops
         public void simulateEnemysTurn(Playfield rootfield, bool simulateTwoTurns, bool playaround, bool print, int pprob, int pprob2)
         {
             bool havedonesomething = true;
@@ -6772,14 +6815,17 @@ namespace ConsoleApplication1
                 {
 
                     FastList<Minion> trgts = posmoves[0].enemyHeroAblility.card.getTargetsForCardEnemy(posmoves[0]);
-                    foreach (Minion trgt in trgts)
+                    for (int i = 0; i < trgts.Count; i++)
                     {
+                        Minion trgt = trgts[i];
                         if (trgt.isHero) continue;
                         Action a = new Action(actionEnum.useHeroPower, posmoves[0].enemyHeroAblility, null, 0, trgt, abilityPenality, 0);
                         Playfield pf = new Playfield(posmoves[0]);
                         pf.doAction(a);
                         posmoves.Add(pf);
+
                     }
+                   
                 }
                 else
                 {
@@ -6792,14 +6838,15 @@ namespace ConsoleApplication1
 
             }
 
-
-            foreach (Minion m in posmoves[0].enemyMinions)
+            for (int i = 0; i < posmoves[0].enemyMinions.Count; i++)
             {
+                Minion m = posmoves[0].enemyMinions[i];
                 if (m.Angr == 0) continue;
                 m.numAttacksThisTurn = 0;
                 m.playedThisTurn = false;
                 m.updateReadyness();
             }
+            
 
             doSomeBasicEnemyAi(posmoves[0]);
 
@@ -6813,24 +6860,25 @@ namespace ConsoleApplication1
                 havedonesomething = false;
                 Playfield bestold = null;
                 float bestoldval = 20000000;
-                foreach (Playfield p in temp)
+                for (int i = 0; i < temp.Count; i++)
                 {
-
+                    Playfield p = temp[i];
                     if (p.complete)
                     {
                         continue;
                     }
 
                     FastList<Action> actions = movegen.getEnemyMoveList(p, false, true, true, 1);// 1 for not using ability moves
-
-                    foreach (Action a in actions)
+                    for (int w = 0; w < actions.Count; w++)
                     {
+                        Action a = actions[w];
                         havedonesomething = true;
                         Playfield pf = new Playfield(p);
                         pf.doAction(a);
                         posmoves.Add(pf);
                         count++;
                     }
+
 
                     //p.endCurrentPlayersTurnAndStartTheNextOne(1, false);
                     p.endEnemyTurn();
@@ -6844,6 +6892,7 @@ namespace ConsoleApplication1
 
                     if (count >= maxwide) break;
                 }
+                
 
                 if (bestoldval <= 10000 && bestold != null)
                 {
@@ -6854,16 +6903,20 @@ namespace ConsoleApplication1
                 if (count >= maxwide) break;
             }
 
-            foreach (Playfield p in posmoves)
+            for (int i = 0; i < posmoves.Count; i++)
             {
+                Playfield p = posmoves[i];
                 if (!p.complete) p.endEnemyTurn();
+
             }
+            
 
             float bestval = int.MaxValue;
             Playfield bestplay = posmoves[0];
 
-            foreach (Playfield p in posmoves)
+            for (int i = 0; i < posmoves.Count; i++)
             {
+                Playfield p = posmoves[i];
                 p.guessingHeroHP = rootfield.guessingHeroHP;
                 float val = Ai.Instance.botBase.getPlayfieldValue(p);
                 if (bestval > val)// we search the worst value
