@@ -43,7 +43,7 @@ namespace ConsoleApplication1.PerformanceTests
         {
             Console.WriteLine("MAKE SURE EXECUTABLE CAN FIND CARDDB");
             setPrint(false);// dont want all those prints
-
+            Program a = new Program();
             Bot b = new Bot();
 
             Console.WriteLine("okay i got here");
