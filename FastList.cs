@@ -37,7 +37,7 @@ namespace ConsoleApplication1
                         break;
                     // add remove and sort
                     case 3:// add
-                        if (goodList.Count < 1000)
+                        if (goodList.Count < 10)
                         {
                             num = a.Next(7);
                             list.Add(num);
@@ -53,8 +53,8 @@ namespace ConsoleApplication1
                         }
                         break;
                     case 5:// sort
-                        list.Sort((x, y) => x.CompareTo(y));
-                        goodList.Sort((x, y) => x.CompareTo(y));
+                        // list.Sort((x, y) => x.CompareTo(y));
+                        //goodList.Sort((x, y) => x.CompareTo(y));
                         break;
                     // find, add range, get range
                     case 6: //find
@@ -63,7 +63,7 @@ namespace ConsoleApplication1
                         goodList.Find(x => x == num);
                         break;
                     case 7: // add range
-                        if (goodList.Count < 1000)
+                        if (goodList.Count < 10)
                         {
                             list.AddRange(list);
                             goodList.AddRange(goodList);
@@ -71,7 +71,7 @@ namespace ConsoleApplication1
                         break;
                     case 8: // get range
                         num = a.Next(goodList.Count);
-                        if(goodList.Count - num-1 >0)
+                        if (goodList.Count - num - 1 > 0)
                             num2 = a.Next(goodList.Count - num - 1);
                         if (num2 > 0)
                         {
@@ -118,7 +118,7 @@ namespace ConsoleApplication1
                         }
                         break;
                     default:
-                        if (goodList.Count < 1000)
+                        if (goodList.Count < 10)
                         {
                             num = a.Next(7);
                             list.Add(num);
@@ -127,21 +127,21 @@ namespace ConsoleApplication1
                         break;
 
                 }
-                if (!list.ToString().Equals(ToString(goodList)))
-                {
-                    Console.WriteLine("they differ because of " + whichOne + ": " + num + ", " + num2);
-                    Console.WriteLine(list.ToString());
-                    Console.WriteLine(ToString(goodList));
-                    Console.WriteLine();
-                }
-                else
-                {
-                    Console.WriteLine("Success on: " + whichOne + ": " + num + ", " + num2);
-                    Console.WriteLine(list.ToString());
-                    Console.WriteLine(ToString(goodList));
-                }
-                
-                
+                /*  if (!list.ToString().Equals(ToString(goodList)))
+                  {
+                      Console.WriteLine("they differ because of " + whichOne + ": " + num + ", " + num2);
+                      Console.WriteLine(list.ToString());
+                      Console.WriteLine(ToString(goodList));
+                      Console.WriteLine();
+                  }
+                  else
+                  {
+                      Console.WriteLine("Success on: " + whichOne + ": " + num + ", " + num2);
+                      Console.WriteLine(list.ToString());
+                      Console.WriteLine(ToString(goodList));
+                  }*/
+
+
             }
         }
         public static string ToString(List<int> data)
@@ -161,12 +161,12 @@ namespace ConsoleApplication1
     }
     public class FastList<T> : IEnumerable<T>
     {
-        
-       
+
+
         private T[] data;
 
         private int count;
-        private int offset=0;
+        private int offset = 0;
 
         // Reusable enumerator
         public class Enumerator : IEnumerator<T>
@@ -188,8 +188,8 @@ namespace ConsoleApplication1
             public bool MoveNext()
             {
                 //Avoids going beyond the end of the collection.
-               do
-               {
+                do
+                {
 
                     if (++index >= list.Count)
                     {
@@ -200,14 +200,14 @@ namespace ConsoleApplication1
                     {
                         // Set current box to next item in collection.
                         current = list[index];
-                        
+
                     }
                 } while (current == null);
-               if (current == null)
-               {
-                   Environment.Exit(0);
-               }
-                
+                if (current == null)
+                {
+                    Environment.Exit(0);
+                }
+
                 return true;
             }
 
@@ -230,10 +230,11 @@ namespace ConsoleApplication1
 
             object System.Collections.IEnumerator.Current
             {
-                get {
+                get
+                {
                     if (current == null)
-                        throw new Exception();    
-                    return current; 
+                        throw new Exception();
+                    return current;
                 }
             }
         }
@@ -242,11 +243,11 @@ namespace ConsoleApplication1
             string builder = "" + count + ": ";
             if (count == 0)
                 return builder;
-            for (int i = 0; i < count-1; i++)
+            for (int i = 0; i < count - 1; i++)
             {
                 builder += this[i].ToString() + ", ";
             }
-           // if (count - 1 < data.Length) 
+            // if (count - 1 < data.Length) 
             builder += this[count - 1].ToString();
             return builder;
         }
@@ -264,18 +265,18 @@ namespace ConsoleApplication1
             }
             else
             {
-                Console.WriteLine("this happened");
-               this.data = new T[8];
+                //Console.WriteLine("this happened");
+                this.data = new T[8];
             }
         }
         public FastList(FastList<T> data)
         {
-            
+
             this.data = new T[data.Capacity];
             count = data.Count;
             for (int i = 0; i < count; i++)
             {
-                this.data[i] = data[i]; 
+                this.data[i] = data[i];
             }
 
         }
@@ -293,10 +294,10 @@ namespace ConsoleApplication1
         public FastList<T> GetRange(int index, int count)
         {
             T[] newData = new T[count];
-            int total = count+index;
+            int total = count + index;
             for (int i = index; i < total; i++)
             {
-                newData[i-index] = this[i];
+                newData[i - index] = this[i];
             }
             return new FastList<T>(newData);
         }
@@ -329,7 +330,7 @@ namespace ConsoleApplication1
         }
         public void RemoveAllOrdered(Func<T, bool> what)// when order of this does not matter
         {
-            int beforeCount = Count;
+
             for (int i = 0; i < Count; i++)
             {
                 if (what.Invoke(this[i]))
@@ -338,15 +339,12 @@ namespace ConsoleApplication1
                     i--;
                 }
             }
-            if (beforeCount > 1 && count == 0)
-            {
-                Console.WriteLine();
-            }
+
             return;
         }
-        public void RemoveAll(Func<T,bool> what)// when order of this does not matter
+        public void RemoveAll(Func<T, bool> what)// when order of this does not matter
         {
-            int beforeCount = Count;
+
             for (int i = 0; i < Count; i++)
             {
                 if (what.Invoke(this[i]))
@@ -354,10 +352,7 @@ namespace ConsoleApplication1
                     RemoveAt(i);
                 }
             }
-            if (beforeCount > 1 && count == 0)
-            {
-                Console.WriteLine();
-            }
+
             return;
         }
         public void RemoveOrdered(T obj) // when order of list matters
@@ -377,20 +372,17 @@ namespace ConsoleApplication1
             count--;
             offset++;
         }
-        public void Sort(Func<T, T,int> functionDelegate)
+        public void Sort(Func<T, T, int> functionDelegate)
         {
-            int beforeCount = Count;
+
             insertionsort(functionDelegate);
-            if (beforeCount > 1 && count == 0)
-            {
-                Console.WriteLine();
-            }
-            
+
         }
-        public void insertionsort(Func<T,T,int> functionDelegate) { 
-            int inner, upper; 
+        public void insertionsort(Func<T, T, int> functionDelegate)
+        {
+            int inner, upper;
             T temp;
-            upper = Count-1;
+            upper = Count - 1;
             for (int outer = 1; outer <= upper; outer++)
             {
                 temp = this[outer];
@@ -404,18 +396,15 @@ namespace ConsoleApplication1
                 this[inner] = temp;
             }
         }
-        public T Find(Func<T,bool> functionDelegate)
+        public T Find(Func<T, bool> functionDelegate)
         {
-            int beforeCount = Count;
+
             for (int i = 0; i < Count; i++)
             {
                 if (functionDelegate.Invoke(this[i]))
                     return this[i];
             }
-            if (beforeCount != count)
-            {
-                Console.WriteLine();
-            }
+
             return default(T);
         }
         public void Insert(int location, T obj)
@@ -423,23 +412,20 @@ namespace ConsoleApplication1
             //count++;
             for (int j = count; j > location; j--)
             {
-                this[j] = this[j-1];
+                this[j] = this[j - 1];
             }
             count++;
             this[location] = obj;
-            
+
         }
         public void RemoveRange(int lowIndex, int highIndex)// when order of list does not matter
         {
-            int beforeCount = Count;
+
             for (int i = lowIndex; i < highIndex; i++)
             {
                 RemoveAt(i);
             }
-            if (beforeCount > 1 && count == 0)
-            {
-                Console.WriteLine();
-            }
+
         }
         public void RemoveAt(int index)// when order of list does not matter
         {
@@ -448,11 +434,11 @@ namespace ConsoleApplication1
         }
         public void RemoveAtOrdered(int index)// when order of list matters
         {
-            for (int j = index; j < count-1; j++)
+            for (int j = index; j < count - 1; j++)
             {
                 this[j] = this[j + 1];
             }
-           count--;           
+            count--;
         }
         public void Add(T obj)
         {
@@ -463,7 +449,7 @@ namespace ConsoleApplication1
             }
             else
             {
-                Console.WriteLine("doubled");
+                //Console.WriteLine("doubled");
                 T[] tmp;
                 tmp = new T[data.Length * 2]; //TODO Review
 
@@ -477,7 +463,7 @@ namespace ConsoleApplication1
                 this[count] = obj;
                 count++;
             }
-            
+
         }
 
         public void Clear()
@@ -526,13 +512,13 @@ namespace ConsoleApplication1
         {
             get
             {
-                
-                return this.data[(offset+index)%this.data.Length];
+
+                return this.data[(offset + index) % this.data.Length];
             }
             set
             {
-                
-                this.data[(offset+index)%this.data.Length]= value;
+
+                this.data[(offset + index) % this.data.Length] = value;
             }
         }
 

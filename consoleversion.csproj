@@ -43,7 +43,7 @@
     <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>bin\Release\TEMP\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -81,8 +81,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FastList.cs" />
+    <Compile Include="MinionsArrayOnly.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="PerformanceTests\ManyBoardPlays.cs" />
-    <Compile Include="MinionsArrayOnly.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
