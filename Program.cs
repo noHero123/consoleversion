@@ -1178,6 +1178,8 @@ namespace ConsoleApplication1
 
     public class Playfield
     {
+
+        public static int totalFields = 0;
         //Todo: delete all new list<minion>
         //TODO: graveyard change (list <card,owner>)
         //Todo: vanish clear all auras/buffs (NEW1_004)
