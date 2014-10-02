@@ -1359,6 +1359,7 @@ namespace ConsoleApplication1
 
         public Playfield()
         {
+            totalFields++;
             this.nextEntity = 1000;
             //this.simulateEnemyTurn = Ai.Instance.simulateEnemyTurn;
             this.ownController = Hrtprozis.Instance.getOwnController();
@@ -1625,7 +1626,7 @@ namespace ConsoleApplication1
 
         public Playfield(Playfield p)
         {
-
+            totalFields++;
             this.nextEntity = p.nextEntity;
 
             this.isOwnTurn = p.isOwnTurn;

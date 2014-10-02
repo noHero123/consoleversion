@@ -1398,9 +1398,10 @@ namespace ConsoleApplication1
             }
             
         }
-
+        public static int totalFields = 0;
         public Playfield()
         {
+            totalFields++;
             this.nextEntity = 1000;
             //this.simulateEnemyTurn = Ai.Instance.simulateEnemyTurn;
             this.ownController = Hrtprozis.Instance.getOwnController();

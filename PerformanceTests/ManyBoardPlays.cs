@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.IO;
 using System.Diagnostics;
@@ -50,6 +49,7 @@ namespace ConsoleApplication1.PerformanceTests
             b.doData(data);//get rid of the first trial just for kicks.
             Stopwatch timer = new Stopwatch();
             timer.Start();
+            Playfield.totalFields = 0;
             for (int i = 0; i < numTimes; i++)
             {
                 b.doData(data);
@@ -62,6 +62,7 @@ namespace ConsoleApplication1.PerformanceTests
 
             setPrint(true);
             Console.WriteLine("test results: average " + (timer.ElapsedMilliseconds / numTimes) + ", sample size: " + numTimes);
+            Console.WriteLine("total playfields analyzed " + (Playfield.totalFields / numTimes));
         }
         public static void setPrint(bool print)
         {
