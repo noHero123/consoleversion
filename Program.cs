@@ -7613,15 +7613,17 @@ namespace ConsoleApplication1
 
             if (p.complete || p.ownHero.Hp <= 0)
             {
+                
                 return ret;
             }
 
             //play cards:
 
             List<CardDB.cardName> playedcards = new List<CardDB.cardName>();
-
+            
             foreach (Handmanager.Handcard hc in p.owncards)
             {
+                
                 CardDB.Card c = hc.card;
                 //help.logg("try play crd" + c.name + " " + c.getManaCost(p) + " " + c.canplayCard(p));
                 if (playedcards.Contains(c.name)) continue; // dont play the same card in one loop
@@ -8005,7 +8007,7 @@ namespace ConsoleApplication1
                 return ret;
             }
 
-
+            // hero dfhasdfkja power
             // attack with minions ###############################################################################################################
 
             List<Minion> playedMinions = new List<Minion>(8);
@@ -16266,6 +16268,7 @@ namespace ConsoleApplication1
             public int race = 0;
             public int rarity = 0;
             public int cost = 0;
+            public int Class = 0;
             public cardtype type = CardDB.cardtype.NONE;
             //public string description = "";
             public int carddraw = 0;
@@ -17225,6 +17228,13 @@ namespace ConsoleApplication1
                     string temp = s.Split(new string[] { "value=\"" }, StringSplitOptions.RemoveEmptyEntries)[1];
                     temp = temp.Split('\"')[0];
                     c.Health = Convert.ToInt32(temp);
+                    continue;
+                }
+                if (s.Contains("<Tag name=\"Class\"")) //added fopr sake of figure out which class it belongs too... sorry adds a little more data
+                {
+                    string temp = s.Split(new string[] { "value=\"" }, StringSplitOptions.RemoveEmptyEntries)[1];
+                    temp = temp.Split('\"')[0];
+                    c.Class = Convert.ToInt32(temp);
                     continue;
                 }
                 if (s.Contains("<Tag name=\"Atk\""))
