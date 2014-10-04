@@ -160,12 +160,9 @@ namespace ConsoleApplication1.noidAI
                 Console.WriteLine(hand[i].card.name);
             }
         }
-        public void endTurn()
+        public void swapEverything()
         {
-            this.triggerEndTurn(true);
-            // the other player is going to do its stuff:
-            myTurn = !myTurn;
-            //swap hero
+             //swap hero
             swapReferences(ownHero, enemyHero);
             swapReferences(ownHeroName, enemyHeroName);
             swapReferences(ownHeroAblility, enemyHeroAblility);
@@ -200,11 +197,15 @@ namespace ConsoleApplication1.noidAI
             Swap(ref anzOwnsorcerersapprentice, ref anzEnemysorcerersapprentice);
             Swap(ref anzOwnsorcerersapprenticeStarted, ref anzEnemysorcerersapprenticeStarted);
             Swap(ref anzOwnSouthseacaptain, ref anzEnemySouthseacaptain);
+        }
+        public void endTurn()
+        {
+            this.triggerEndTurn(true);
+            // the other player is going to do its stuff:
+            myTurn = !myTurn;
+            swapEverything();
             
-            // hero entity
-
-            //ownMaxMana++;
-            //mana = ownMaxMana;
+           
             Console.WriteLine("TURN PASSING");
             if(!myTurn)
                 EnemyCards.Add(enemyDeck[++enemyDeckPointer]);
