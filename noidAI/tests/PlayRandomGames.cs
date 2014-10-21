@@ -166,7 +166,7 @@ namespace ConsoleApplication1.noidAI
             swapReferences(ownHero, enemyHero);
             swapReferences(ownHeroName, enemyHeroName);
             swapReferences(ownHeroAblility, enemyHeroAblility);
-            Swap(ref ownHeroEntity, ref enemyHeroEntity);
+            //Swap(ref ownHeroEntity, ref enemyHeroEntity);
             //swap weapon
             swapReferences(ownWeaponName, enemyWeaponName);
             Swap(ref ownWeaponAttack,ref enemyWeaponAttack);
