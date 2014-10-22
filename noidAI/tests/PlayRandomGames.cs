@@ -50,16 +50,39 @@ namespace ConsoleApplication1.noidAI
             while (true)
             {
                 actions = movegen.getMoveList(defaultField, false, false, false);
-                while (actions.Count > 0)
+                while (actions.Count > 0)// just do all the actions we can
                 {
 
 
                     defaultField.doAction(actions[0]);
-                    howLong++;
+
+                    if(actions[0].card!=null)
+                        for(int i = 0; i<defaultField.owncards.Count; i++){
+                            Handmanager.Handcard hh = defaultField.owncards[i];
+                            if (hh.entity == actions[0].card.entity)
+                            {
+                                defaultField.owncards.RemoveAt(i);
+                                break;
+                            }
+                        }
+                    List<Handmanager.Handcard> hand = defaultField.owncards;
+                   
+                    for (int i = 0; i < hand.Count; i++)
+                    {
+                        
+                        if (hand[i].card.name == CardDB.Instance.cardNamestringToEnum("unknown"))
+                        {
+                            if (actions[0].card != null)
+                            Console.WriteLine("just played " + actions[0].card.card.name);
+                            defaultField.printHand(hand);
+                            defaultField.owncards.RemoveAt(i);
+                            //while (true) { }
+                         }
+                    }
                     
                     actions = movegen.getMoveList(defaultField, false, false, false);
                 }
-                defaultField.endTurn();
+                defaultField.endTurn();// end turn
             }
 
            
@@ -134,10 +157,13 @@ namespace ConsoleApplication1.noidAI
         int enemyDeckPointer = 0;
         public noidPlayState(Handmanager.Handcard[] deck1, Handmanager.Handcard[] deck2)
         {
+            //shapeshift
+            ownHeroAblility.card = CardDB.Instance.getCardDataFromID(CardDB.cardIDEnum.CS2_017);
+            enemyHeroAblility.card = CardDB.Instance.getCardDataFromID(CardDB.cardIDEnum.CS2_017);
             ownHero.Hp = 30;
             enemyHero.Hp = 30;
-            ownHeroAblility = new Handmanager.Handcard(Hrtprozis.Instance.heroAbility);
-            enemyHeroAblility = new Handmanager.Handcard(Hrtprozis.Instance.enemyAbility);
+            //ownHeroAblility = new Handmanager.Handcard(Hrtprozis.Instance.heroAbility);
+            //enemyHeroAblility = new Handmanager.Handcard(Hrtprozis.Instance.enemyAbility);
             enemyDeck = deck2;
             myDeck = deck1;
             for (int i = 0; i < 4; i++)
@@ -163,9 +189,9 @@ namespace ConsoleApplication1.noidAI
         public void swapEverything()
         {
              //swap hero
-            swapReferences(ownHero, enemyHero);
-            swapReferences(ownHeroName, enemyHeroName);
-            swapReferences(ownHeroAblility, enemyHeroAblility);
+            Swap(ref ownHero, ref enemyHero);
+            Swap(ref ownHeroName, ref enemyHeroName);
+            Swap(ref ownHeroAblility, ref enemyHeroAblility);
             //Swap(ref ownHeroEntity, ref enemyHeroEntity);
             //swap weapon
             swapReferences(ownWeaponName, enemyWeaponName);
@@ -174,18 +200,18 @@ namespace ConsoleApplication1.noidAI
             Swap(ref ownWeaponName, ref enemyWeaponName);
 
             //swap deck
-            swapReferences(enemyDeck,myDeck);
+            Swap(ref enemyDeck,ref myDeck);
             Swap(ref ownDeckSize, ref enemyDeckSize);
 
             //swap hand
             enemyAnzCards = owncards.Count;
-            swapReferences(owncards,EnemyCards);
+            Swap(ref owncards,ref EnemyCards);
            
             // swap minions
-            swapReferences(ownMinions, enemyMinions);
+            Swap(ref ownMinions, ref enemyMinions);
 
             //swap mana
-            swapReferences(ownMaxMana, enemyMaxMana);
+            Swap(ref ownMaxMana, ref enemyMaxMana);
             // all the special minions
             Swap(ref anzOwnRaidleader, ref anzEnemyRaidleader);
             Swap(ref anzOwnStormwindChamps, ref anzEnemyStormwindChamps);
@@ -207,13 +233,13 @@ namespace ConsoleApplication1.noidAI
             
            
             Console.WriteLine("TURN PASSING");
-            if(!myTurn)
-                EnemyCards.Add(enemyDeck[++enemyDeckPointer]);
-            else
-                owncards.Add(myDeck[++ownDeckPointer]);
+            if (!myTurn)
+            owncards.Add(myDeck[++enemyDeckPointer]);
+            else 
+            owncards.Add(myDeck[++ownDeckPointer]);
 
 
-            printHand(EnemyCards);
+                printHand(EnemyCards);
 
             printHand(owncards);
             triggerStartTurn(true);
