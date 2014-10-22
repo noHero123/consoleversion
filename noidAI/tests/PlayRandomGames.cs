@@ -49,13 +49,16 @@ namespace ConsoleApplication1.noidAI
             int howLong = 0;
             while (true)
             {
+                Console.WriteLine("before healths... " + defaultField.ownHero.Hp + " " + defaultField.enemyHero.Hp);
                 actions = movegen.getMoveList(defaultField, false, false, false);
                 while (actions.Count > 0)// just do all the actions we can
                 {
-
-
+                    //Console.WriteLine("before i play a card ");
+                    //defaultField.printHand(defaultField.owncards);
+                    //Console.WriteLine();
                     defaultField.doAction(actions[0]);
 
+                    
                     if(actions[0].card!=null)
                         for(int i = 0; i<defaultField.owncards.Count; i++){
                             Handmanager.Handcard hh = defaultField.owncards[i];
@@ -66,22 +69,27 @@ namespace ConsoleApplication1.noidAI
                             }
                         }
                     List<Handmanager.Handcard> hand = defaultField.owncards;
-                   
-                    for (int i = 0; i < hand.Count; i++)
+
+                    for (int i = 0; i < hand.Count; i++)// HEY LOOK HERE!!
                     {
-                        
+
                         if (hand[i].card.name == CardDB.Instance.cardNamestringToEnum("unknown"))
                         {
                             if (actions[0].card != null)
-                            Console.WriteLine("just played " + actions[0].card.card.name);
-                            defaultField.printHand(hand);
+                                Console.WriteLine("just played " + actions[0].card.card.name);
+                            //defaultField.printHand(hand);
                             defaultField.owncards.RemoveAt(i);
-                            //while (true) { }
-                         }
+                            defaultField.owncards.Add(myDeck[(defaultField.ownDeckPointer)]);
+                            defaultField.ownDeckPointer++;
+                            i--;
+                          //  while (true) { }
+                        }
                     }
-                    
+                    if (actions[0].card != null)
+                        Console.WriteLine("just played " + actions[0].card.card.name);
                     actions = movegen.getMoveList(defaultField, false, false, false);
                 }
+                Console.WriteLine("after healths... " + defaultField.ownHero.Hp + " " + defaultField.enemyHero.Hp);
                 defaultField.endTurn();// end turn
             }
 
@@ -147,13 +155,13 @@ namespace ConsoleApplication1.noidAI
     }
     class noidPlayState: Playfield
     {
-        
+        int turnsElapsed = 0;
         public Handmanager.Handcard[] myDeck; // this will be randomized per play, but not per action (if that makes any sense)
         public Handmanager.Handcard[] enemyDeck; // this will be randomized per play, but not per action (if that makes any sense)
         public List<Handmanager.Handcard> EnemyCards = new List<Handmanager.Handcard>();// dont want to modify botmaker's stuff without permission, he's already having memory problems
         // keep track of the enemycards myself
         bool myTurn = true;
-        int ownDeckPointer = 0;
+        public int ownDeckPointer = 0;
         int enemyDeckPointer = 0;
         public noidPlayState(Handmanager.Handcard[] deck1, Handmanager.Handcard[] deck2)
         {
@@ -168,9 +176,9 @@ namespace ConsoleApplication1.noidAI
             myDeck = deck1;
             for (int i = 0; i < 4; i++)
             {
-                EnemyCards.Add(enemyDeck[++enemyDeckPointer]);
+              //  EnemyCards.Add(enemyDeck[++enemyDeckPointer]);
                 
-                owncards.Add(myDeck[++ownDeckPointer]);
+                //owncards.Add(myDeck[++ownDeckPointer]);
                 //printHand(owncards);
             }
             mana = 1;
@@ -226,24 +234,44 @@ namespace ConsoleApplication1.noidAI
         }
         public void endTurn()
         {
+            if (ownHero.Hp <= 0)
+            {
+                if (myTurn)
+                    Console.WriteLine("uh warrior wins?");
+                else
+                    Console.WriteLine("uh druid wins?");
+                Console.WriteLine("turns elapsed: " + turnsElapsed);
+                while (true) { }
+            }
+            if (enemyHero.Hp <= 0)
+            {
+                if (myTurn)
+                    Console.WriteLine("uh druid wins?");
+                else
+                    Console.WriteLine("uh warrior wins?");
+                Console.WriteLine("turns elapsed: " + turnsElapsed);
+                while (true) { }
+            }
             this.triggerEndTurn(true);
+           
             // the other player is going to do its stuff:
             myTurn = !myTurn;
             swapEverything();
             
            
             Console.WriteLine("TURN PASSING");
-            if (!myTurn)
-            owncards.Add(myDeck[++enemyDeckPointer]);
-            else 
-            owncards.Add(myDeck[++ownDeckPointer]);
+           
+            //owncards.Add(myDeck[++ownDeckPointer]);
 
 
-                printHand(EnemyCards);
+               // printHand(EnemyCards);
 
-            printHand(owncards);
+           // printHand(owncards);
             triggerStartTurn(true);
+            owncards.RemoveAt(owncards.Count - 1);
             prepareNextTurn(true);
+            turnsElapsed++;
+            //owncards.RemoveAt(owncards.Count);
         }
 
         static void Swap<T>(ref T lhs, ref T rhs)
